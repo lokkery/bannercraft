@@ -11,18 +11,37 @@
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     background: #f5f4f0;
     min-height: 100vh;
+    padding: 1.5rem;
+  }
+
+  .ui {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem 1rem;
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .preview-pane {
+    flex: 0 0 45%;
+    position: sticky;
+    top: 1.5rem;
+    height: fit-content;
+  }
+
+  .settings-pane {
+    flex: 1;
+    min-width: 0;
+  }
+
+  @media (max-width: 800px) {
+    .ui { flex-direction: column; }
+    .preview-pane { position: static; flex: none; }
   }
 
   body.image-only { background: transparent; padding: 0; justify-content: flex-start; }
   body.image-only canvas { display: block; max-width: 100%; }
   body.image-only .ui { display: none; }
-
-  .ui { width: 100%; max-width: 880px; }
 
   h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.02em; color: #111; margin-bottom: 1.5rem; }
   h2 { font-size: 1.2rem; font-weight: 700; letter-spacing: -0.02em; color: #111; margin-bottom: 1.5rem; }
@@ -92,14 +111,50 @@
   .actions { display: flex; gap: 8px; margin-top: 1rem; flex-wrap: wrap; }
   small { font-size: 11px; color: #aaa; margin-top: 4px; display: block; }
   .card-title { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #bbb; margin-bottom: 14px; }
+
+  .footer {
+    margin-top: 2rem;
+    text-align: center;
+    padding: 1rem;
+    font-size: 12px;
+    color: #888;
+  }
+  .footer a {
+    color: #888;
+    text-decoration: none;
+    border-bottom: 1px solid #ccc;
+    transition: border-color 0.2s;
+  }
+  .footer a:hover {
+    border-color: #111;
+  }
 </style>
 </head>
 <body>
 
 <div class="ui">
-  <h1>Bannercraft<br><span class="card-title">by Lokkery</span></h1>
+  <div class="preview-pane">
+    <div class="card">
+      <h1>Bannercraft<br><span class="card-title">by Lokkery</span></h1>
+      <div class="preview-wrap">
+        <canvas id="canvas"></canvas>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" onclick="downloadPNG()">↓ Download PNG</button>
+        <button class="btn btn-ghost" onclick="copyURL()">Copy URL</button>
+      </div>
+      <div class="field" style="margin-top:1rem;">
+        <label>Shareable URL</label>
+        <div class="url-box">
+          <input type="text" id="urlOut" readonly />
+        </div>
+        <small>Add &amp;raw=1 to get the image directly with no UI</small>
+      </div>
+    </div>
+  </div>
 
-  <!-- Content card -->
+  <div class="settings-pane">
+    <!-- Content card -->
   <div class="card">
     <div class="card-title">Content</div>
     <div class="field">
@@ -152,6 +207,10 @@
         <label>Brand size <span class="val" id="brandSzVal">5</span></label>
         <input type="range" id="brandSize" min="1" max="10" value="5" />
       </div>
+      <div class="slider-field">
+        <label>Brand opacity <span class="val" id="brandOpacityVal">75%</span></label>
+        <input type="range" id="brandOpacity" min="10" max="100" value="75" />
+      </div>
     </div>
   </div>
 
@@ -197,25 +256,12 @@
       </div>
     </div>
   </div>
-
-  <!-- Preview card -->
-  <div class="card">
-    <div class="preview-wrap">
-      <canvas id="canvas"></canvas>
-    </div>
-    <div class="actions">
-      <button class="btn btn-primary" onclick="downloadPNG()">↓ Download PNG</button>
-      <button class="btn btn-ghost" onclick="copyURL()">Copy URL</button>
-    </div>
-    <div class="field" style="margin-top:1rem;">
-      <label>Shareable URL</label>
-      <div class="url-box">
-        <input type="text" id="urlOut" readonly />
-      </div>
-      <small>Add &amp;raw=1 to get the image directly with no UI</small>
-    </div>
   </div>
 </div>
+
+<footer class="footer">
+  BannerCraft by <a href="https://lokkery.com" target="_blank">lokkery.com</a>
+</footer>
 
 <canvas id="canvasStandalone" style="display:none"></canvas>
 
@@ -266,6 +312,7 @@ const state = {
   textColor: 'dark',
   fontStack: 'Arial, sans-serif',
   fontName: 'Arial',
+  brandOpacity: 75,
 };
 
 // ── Build swatches ──────────────────────────────────────────────────────────
@@ -335,7 +382,7 @@ function draw(canvas, opts) {
     const tagSz = Math.round(h * 0.055 * brandScale);
     ctx.font = `700 ${tagSz}px ${fontStack}`;
     ctx.fillStyle = color;
-    ctx.globalAlpha = 0.75;
+    ctx.globalAlpha = (opts.brandOpacity || 75) / 100;
     const tagW = ctx.measureText(tagline).width;
     ctx.fillText(tagline, w - padX - tagW, h - padY);
     ctx.globalAlpha = 1;
@@ -388,6 +435,7 @@ function getOpts() {
     tagline:      document.getElementById('tagline').value,
     headlineSize: +document.getElementById('headlineSize').value,
     brandSize:    +document.getElementById('brandSize').value,
+    brandOpacity: +document.getElementById('brandOpacity').value,
     padX:         +document.getElementById('padX').value,
     padY:         +document.getElementById('padY').value,
     w:            +document.getElementById('resW').value || 1200,
@@ -416,6 +464,7 @@ function buildURL(opts) {
   if (opts.tagline)                 p.set('tagline', opts.tagline);
   if (opts.headlineSize > 0)        p.set('hs', opts.headlineSize);
   if (opts.brandSize !== 5)         p.set('bs', opts.brandSize);
+  if (opts.brandOpacity !== 75)     p.set('bo', opts.brandOpacity);
   if (opts.padX !== 9)              p.set('px', opts.padX);
   if (opts.padY !== 16)             p.set('py', opts.padY);
   p.set('raw', '1');
@@ -458,6 +507,10 @@ document.getElementById('headlineSize').addEventListener('input', e => {
 });
 document.getElementById('brandSize').addEventListener('input', e => {
   document.getElementById('brandSzVal').textContent = e.target.value;
+  redraw();
+});
+document.getElementById('brandOpacity').addEventListener('input', e => {
+  document.getElementById('brandOpacityVal').textContent = e.target.value + '%';
   redraw();
 });
 document.getElementById('padX').addEventListener('input', e => {
@@ -518,6 +571,7 @@ if (params.has('text')) {
     tagline:      params.get('tagline') || '',
     headlineSize: +(params.get('hs')  || 0),
     brandSize:    +(params.get('bs')  || 5),
+    brandOpacity: +(params.get('bo')  || 75),
     padX:         +(params.get('px')  || 9),
     padY:         +(params.get('py')  || 16),
     w:            +(params.get('w')   || 1200),
@@ -548,6 +602,7 @@ if (params.has('text')) {
     document.getElementById('resH').value = opts.h;
     if (opts.headlineSize) { document.getElementById('headlineSize').value = opts.headlineSize; document.getElementById('headlineSzVal').textContent = opts.headlineSize; }
     if (opts.brandSize !== 5) { document.getElementById('brandSize').value = opts.brandSize; document.getElementById('brandSzVal').textContent = opts.brandSize; }
+    if (opts.brandOpacity !== 75) { document.getElementById('brandOpacity').value = opts.brandOpacity; document.getElementById('brandOpacityVal').textContent = opts.brandOpacity + '%'; }
     if (opts.padX !== 9)  { document.getElementById('padX').value = opts.padX; document.getElementById('padXVal').textContent = opts.padX + '%'; }
     if (opts.padY !== 16) { document.getElementById('padY').value = opts.padY; document.getElementById('padYVal').textContent = opts.padY + '%'; }
 
