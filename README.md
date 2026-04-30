@@ -1,8 +1,8 @@
-# 🎨 Bannercraft
+# 🎨 Quickbanner
 
 **One HTML file. Zero dependencies. Infinite banners.**
 
-Bannercraft is a fully client-side banner image generator. Drop the file on any static host, share a URL with your headline baked into it, and get a pixel-perfect PNG back — no server, no build step, no API key.
+Quickbanner is a fully client-side banner image generator. Drop the file on any static host, share a URL with your headline baked into it, and get a pixel-perfect PNG back — no server, no build step, no API key.
 
 > **Origin story:** Built by [Lokkery](https://lokkery.com) to generate featured images for the [Lokkery Blog](https://lokkery.com/blog). Some article covers you see there was made with this tool. I needed a fast, repeatable way to create consistent title banners without Figma, Canva, or a designer — so i built it in a single HTML file and open-sourced it.
 
@@ -111,7 +111,7 @@ Google Fonts (loaded on demand): `Inter` `Montserrat` `Oswald` `Raleway` `Playfa
 
 ## 🏗 How It Works
 
-Bannercraft uses the browser's native **Canvas 2D API** — no image processing libraries, no third-party SDKs. Everything happens locally in your browser:
+Quickbanner uses the browser's native **Canvas 2D API** — no image processing libraries, no third-party SDKs. Everything happens locally in your browser:
 
 1. URL parameters are parsed on load and applied to state
 2. The canvas is drawn: gradient → brand text → headline (auto-wrapped and auto-scaled, or manually sized)
@@ -130,7 +130,7 @@ MIT — do whatever you want with it.
 
 ## 🔒 Built by Lokkery
 
-Bannercraft is a side tool built and open-sourced by **[Lokkery](https://lokkery.com)** — a shared development environment booking platform for software teams.
+Quickbanner is a side tool built and open-sourced by **[Lokkery](https://lokkery.com)** — a shared development environment booking platform for software teams.
 
 ### What is Lokkery?
 
